@@ -2,6 +2,9 @@ var mongoose = require('mongoose');
 var router = require('express').Router();
 var passport = require('passport');
 var User = mongoose.model('User');
+var Area = mongoose.model('Area');
+var Company = mongoose.model('Company');
+var Schedule = mongoose.model('Schedule');
 var auth = require('../auth');
 
 router.get('/user', auth.required, function(req, res, next){
@@ -40,6 +43,7 @@ router.put('/user', auth.required, function(req, res, next){
 });
 
 router.post('/users/login', function(req, res, next){
+  console.log(req.body)
   if(!req.body.user.email){
     return res.status(422).json({errors: {email: "can't be blank"}});
   }
@@ -63,9 +67,9 @@ router.post('/users/login', function(req, res, next){
 router.post('/users', function(req, res, next){
   var user = new User();
 
-  user.username = req.body.user.username;
-  user.email = req.body.user.email;
-  user.setPassword(req.body.user.password);
+  user.username = req.body.username;
+  user.email = req.body.email;
+  user.setPassword(req.body.password);
 
   user.save().then(function(){
     return res.json({user: user.toAuthJSON()});

@@ -46,8 +46,12 @@ mongoose.connect(config.databaseUrl, {
 });
 
 require('./models/User');
+require('./models/Area');
 require('./models/Article');
 require('./models/Comment');
+require('./models/Company');
+require('./models/Message');
+require('./models/Schedule');
 require('./config/passport');
 
 app.use(require('./routes'));

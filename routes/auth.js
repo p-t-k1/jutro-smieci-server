@@ -21,7 +21,8 @@ var auth = {
     userProperty: 'payload',
     credentialsRequired: false,
     getToken: getTokenFromHeader
-  })
+  }),
+  getTokenFromHeader: getTokenFromHeader
 };
 
 module.exports = auth;

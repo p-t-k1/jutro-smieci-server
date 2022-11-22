@@ -1,8 +1,12 @@
 var router = require('express').Router();
 
 router.use('/', require('./users'));
+router.use('/areas', require('./areas'));
+router.use('/schedules', require('./schedules'));
 router.use('/profiles', require('./profiles'));
 router.use('/articles', require('./articles'));
+router.use('/companies', require('./companies'));
+router.use('/messages', require('./messages'));
 router.use('/tags', require('./tags'));
 
 router.use(function(err, req, res, next){
