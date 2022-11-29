@@ -26,8 +26,17 @@ router.get('/getCompanyMessages', auth.required, function(req, res, next){
 
     Message.find({firma: decodedToken.id}).populate('obszar').then(function(messages){
         if(!messages){ return res.sendStatus(401); }
-        console.log(messages)
         return res.send(messages);
+    }).catch(next);
+});
+
+router.get('/getCompanyMessagesAmount', auth.required, function(req, res, next){
+    let companyToken = auth.getTokenFromHeader(req);
+    let decodedToken = jwt_decode(companyToken);
+
+    Message.count({firma: decodedToken.id, otwarta: false}).then(function(messages){
+        if(!messages){ return res.send({amount: 0}); }
+        return res.send({amount: messages});
     }).catch(next);
 });
 

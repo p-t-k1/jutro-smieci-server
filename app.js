@@ -47,7 +47,6 @@ mongoose.connect(config.databaseUrl, {
 
 require('./models/User');
 require('./models/Area');
-require('./models/Article');
 require('./models/Comment');
 require('./models/Company');
 require('./models/Message');
