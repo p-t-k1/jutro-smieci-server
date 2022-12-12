@@ -1,79 +1,80 @@
 var mongoose = require('mongoose');
+const {sendVerificationEmail} = require("../../utils/mailier");
+const secret = require('../../config').secret;
+var jwt = require('jsonwebtoken');
+const auth = require("../auth");
+const jwt_decode = require("jwt-decode");
+const moment = require("moment");
 var router = require('express').Router();
-var passport = require('passport');
 var User = mongoose.model('User');
-var Area = mongoose.model('Area');
-var Company = mongoose.model('Company');
 var Schedule = mongoose.model('Schedule');
-var auth = require('../auth');
 
-router.get('/user', auth.required, function(req, res, next){
-  User.findById(req.payload.id).then(function(user){
-    if(!user){ return res.sendStatus(401); }
+router.post('/setNotification', function (req, res, next) {
 
-    return res.json({user: user.toAuthJSON()});
-  }).catch(next);
+    User.findOne({email: req.body.email}).then(async function (user) {
+        let isNewUser = !user ? true : false;
+        let userEmail = req.body.email;
+
+        let token = jwt.sign({
+            email: req.body.email,
+            days: req.body.days,
+            areaId: req.body.areaId,
+            isNewUser: isNewUser
+        }, secret)
+
+        // wyslij maila z potwierdzeniem zmiany
+        await sendVerificationEmail(userEmail, isNewUser, token)
+
+        return res.send("Gotowe, kliknij w link wysłany na adres email aby potwierdzić")
+
+    }).catch(next);
 });
 
-router.put('/user', auth.required, function(req, res, next){
-  User.findById(req.payload.id).then(function(user){
-    if(!user){ return res.sendStatus(401); }
-
-    // only update fields that were actually passed...
-    if(typeof req.body.user.username !== 'undefined'){
-      user.username = req.body.user.username;
+router.get('/verify', async function (req, res, next) {
+    let token = req.query.token;
+    let decodedToken = jwt.decode(token, secret);
+    let getNotificationsDates = async (areaId, days) => {
+        let notificationsDates = []
+        await Schedule.findOne({obszar: areaId}).then(function (schedule) {
+            if (!schedule) {
+                return res.sendStatus(404);
+            }
+            schedule.wywozy.map(element => {
+                let formattedDate = moment(new Date(`${element.rok}-${element.miesiac}-${element.dzien}`)).subtract(days.substring(0, 1), 'days').format('DD-MM-YYYY');
+                //console.log("formattedDate: " + new Date(formattedDate.split('-').reverse().join('-')))
+                //console.log("today: " + new Date(moment().format('MM-DD-YYYY')))
+                //console.log(moment(formattedDate.toString()).format('MM-DD-YYYY') >= moment().format('MM-DD-YYYY'))
+                if(new Date(formattedDate.split('-').reverse().join('-')) >= new Date(moment().format('MM-DD-YYYY'))) {
+                    notificationsDates.push({data: formattedDate, typ: element.typ})
+                }
+            })
+            return notificationsDates
+        });
+        return await notificationsDates
     }
-    if(typeof req.body.user.email !== 'undefined'){
-      user.email = req.body.user.email;
-    }
-    if(typeof req.body.user.bio !== 'undefined'){
-      user.bio = req.body.user.bio;
-    }
-    if(typeof req.body.user.image !== 'undefined'){
-      user.image = req.body.user.image;
-    }
-    if(typeof req.body.user.password !== 'undefined'){
-      user.setPassword(req.body.user.password);
-    }
 
-    return user.save().then(function(){
-      return res.json({user: user.toAuthJSON()});
-    });
-  }).catch(next);
-});
-
-router.post('/users/login', function(req, res, next){
-  console.log(req.body)
-  if(!req.body.user.email){
-    return res.status(422).json({errors: {email: "can't be blank"}});
-  }
-
-  if(!req.body.user.password){
-    return res.status(422).json({errors: {password: "can't be blank"}});
-  }
-
-  passport.authenticate('local', {session: false}, function(err, user, info){
-    if(err){ return next(err); }
-
-    if(user){
-      user.token = user.generateJWT();
-      return res.json({user: user.toAuthJSON()});
+    if (decodedToken.isNewUser) {
+        let user = new User();
+        user.email = decodedToken.email
+        user.ileWczesniej = decodedToken.days
+        user.area = decodedToken.areaId
+        user.powiadomienia = await getNotificationsDates(decodedToken.areaId, decodedToken.days)
+        user.save().catch((error) => {
+                //When there are errors We handle them here
+                console.log(error);
+        })
     } else {
-      return res.status(422).json(info);
+        User.findOne({email: decodedToken.email}).then(async function (user) {
+            user.email = decodedToken.email
+            user.ileWczesniej = decodedToken.days
+            user.area = decodedToken.areaId
+            user.powiadomienia = await getNotificationsDates(decodedToken.areaId, decodedToken.days)
+            user.save()
+        });
     }
-  })(req, res, next);
-});
 
-router.post('/users', function(req, res, next){
-  var user = new User();
 
-  user.username = req.body.username;
-  user.email = req.body.email;
-  user.setPassword(req.body.password);
-
-  user.save().then(function(){
-    return res.json({user: user.toAuthJSON()});
-  }).catch(next);
+    return res.send("Potwierdzono!")
 });
 
 module.exports = router;

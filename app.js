@@ -10,6 +10,7 @@ let http = require('http'),
     passport = require('passport'),
     errorhandler = require('errorhandler'),
     mongoose = require('mongoose');
+    cron = require("node-cron");
 
 let isProduction = config.stage === 'production';
 
@@ -47,11 +48,11 @@ mongoose.connect(config.databaseUrl, {
 
 require('./models/User');
 require('./models/Area');
-require('./models/Comment');
 require('./models/Company');
 require('./models/Message');
 require('./models/Schedule');
 require('./config/passport');
+const {notificationsToSend, numberOfNotificationsToSend, numberOfNotificationsToSendToday, sendTodaysNotifications} = require("./utils/notifications");
 
 app.use(require('./routes'));
 
@@ -87,6 +88,14 @@ app.use(function(err, req, res, next) {
     message: err.message,
     error: {}
   }});
+});
+
+// scheduling a task with node-cron
+cron.schedule("*/15 * * * * *", async function () {
+  console.log("\n---------------------");
+  console.log("Liczba wszystkich powiadomień do rozesłania: " + await numberOfNotificationsToSend());
+  console.log("Liczba powiadomień do rozesłania dzisiaj: " + await numberOfNotificationsToSendToday());
+  await sendTodaysNotifications();
 });
 
 // finally, let's start our server...
