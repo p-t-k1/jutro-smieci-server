@@ -1,11 +1,11 @@
-var mongoose = require('mongoose');
-var router = require('express').Router();
-var passport = require('passport');
-var User = mongoose.model('User');
-var Area = mongoose.model('Area');
-var Company = mongoose.model('Company');
-var Schedule = mongoose.model('Schedule');
-var auth = require('../auth');
+let mongoose = require('mongoose');
+let router = require('express').Router();
+let passport = require('passport');
+let User = mongoose.model('User');
+let Area = mongoose.model('Area');
+let Company = mongoose.model('Company');
+let Schedule = mongoose.model('Schedule');
+let auth = require('../auth');
 
 
 router.post('/login', function(req, res, next){

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {sendNotification} = require("./mailier");
-var User = mongoose.model('User');
+let User = mongoose.model('User');
 
 async function numberOfNotificationsToSend() {
   let count = 0;

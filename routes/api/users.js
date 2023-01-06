@@ -1,13 +1,13 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 const {sendVerificationEmail} = require("../../utils/mailier");
 const secret = require('../../config').secret;
-var jwt = require('jsonwebtoken');
+let jwt = require('jsonwebtoken');
 const auth = require("../auth");
 const jwt_decode = require("jwt-decode");
 const moment = require("moment");
-var router = require('express').Router();
-var User = mongoose.model('User');
-var Schedule = mongoose.model('Schedule');
+let router = require('express').Router();
+let User = mongoose.model('User');
+let Schedule = mongoose.model('Schedule');
 
 router.post('/setNotification', function (req, res, next) {
 

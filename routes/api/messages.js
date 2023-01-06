@@ -1,9 +1,9 @@
-var mongoose = require('mongoose');
-var router = require('express').Router();
-var passport = require('passport');
-var Message = mongoose.model('Message');
-var auth = require('../auth');
-var jwt_decode = require('jwt-decode');
+let mongoose = require('mongoose');
+let router = require('express').Router();
+let passport = require('passport');
+let Message = mongoose.model('Message');
+let auth = require('../auth');
+let jwt_decode = require('jwt-decode');
 
 router.post('/addNew', function(req, res, next){
 

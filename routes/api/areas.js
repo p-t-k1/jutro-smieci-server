@@ -1,9 +1,9 @@
-var mongoose = require('mongoose');
-var router = require('express').Router();
-var passport = require('passport');
-var Area = mongoose.model('Area');
-var auth = require('../auth');
-var jwt_decode = require('jwt-decode');
+let mongoose = require('mongoose');
+let router = require('express').Router();
+let passport = require('passport');
+let Area = mongoose.model('Area');
+let auth = require('../auth');
+let jwt_decode = require('jwt-decode');
 
 router.get('/getCompanyAreas', auth.required, function(req, res, next){
     let companyToken = auth.getTokenFromHeader(req);
@@ -39,7 +39,7 @@ router.delete('/delete', auth.required, function(req, res, next){
     let decodedToken = jwt_decode(companyToken);
 
     let companyId = decodedToken.id
-    var areaId = req.query.areaId;
+    let areaId = req.query.areaId;
 
     Area.findById(areaId).then(function(area){
         if (!area) { return res.sendStatus(401); }

@@ -1,8 +1,8 @@
-var mongoose = require('mongoose');
-var router = require('express').Router();
-var passport = require('passport');
-var Schedule = mongoose.model('Schedule');
-var auth = require('../auth');
+let mongoose = require('mongoose');
+let router = require('express').Router();
+let passport = require('passport');
+let Schedule = mongoose.model('Schedule');
+let auth = require('../auth');
 const jwt_decode = require("jwt-decode");
 
 //pobierz harmonogram z podanego id lokalizacji
